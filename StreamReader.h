@@ -13,6 +13,8 @@
 
 #define USUAL_SIZE 4096
 
+const char StartSymbol = 0x24;
+
 class StreamReader: public IStreamReader {
 public:
     StreamReader(std::shared_ptr<IDataHandler> &ph): handler(ph){};
