@@ -14,21 +14,22 @@ using namespace std;
 int StreamReader::receive_fast(const char *stream, size_t bytes_read){
     int npack = 0;
 
-    buffer.insert(buffer.end(), stream, &stream[bytes_read-1]);
+    buffer.insert(buffer.end(), stream, stream+bytes_read);
 
     auto oldit(buffer.begin());// vector<char>::iterator
     for (auto it = buffer.begin(); it < buffer.end();) {
         if (*it == StartSymbol) { // обрабатываем бинарный пакет
             uint32_t *packlen;
             if (it+Offset < buffer.end() &&
-                    it+Offset+*(packlen=reinterpret_cast<uint32_t*>(&it[1])) < buffer.end()){// проверка что пакет пришел целиком
+                    it+Offset+*(packlen=reinterpret_cast<uint32_t*>(&it[1])) <= buffer.end()){// проверка что пакет пришел целиком
                 handler->handle_binary_data(&it[Offset], static_cast<size_t>(*packlen));// static_cast чтобы избежать C-style cast
                 it += Offset + *packlen;
             } else // пакет пришел частично, остальная часть должна придти со следущим вызовом receive
                 break;// прекращаем цикл
         } else { // обрабатываем пакет-строку
-            if (find_horspool(buffer, it) < buffer.end()) {
-                handler->handle_text_data(&*oldit, distance(oldit, it));
+            vector<char>::const_iterator curend;
+            if ((curend=find_horspool(buffer, it)) < buffer.end()) {
+                handler->handle_text_data(&*oldit, distance<vector<char>::const_iterator>(oldit, curend));
             } else // пакет пришел частично
                 break;// прекращаем цикл
         }
@@ -58,6 +59,7 @@ vector<char>::const_iterator StreamReader::find_horspool(const vector<char> &vec
     const size_t sz = sizeof(StrEnd);
     char c;
 
+    auto a = vec.end()-sz;
     while (it <= vec.end()-sz) {
         c = *(it+sz-1);// берем посл. символ из сравниваемой последовательности
         if (StrEnd[sz-1] == c && memcmp(&*it, StrEnd, sz - 1) == 0) {
