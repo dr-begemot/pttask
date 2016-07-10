@@ -10,32 +10,6 @@
 
 using namespace std;
 
-// Формируем таблицу стоп-символов
-void StreamReader::preBmBc() {
-    const size_t sz = sizeof(StrEnd);
-    memset(bmBc, sz, sizeof(bmBc));
-    for (size_t i = 0; i < sz - 1; ++i)
-        bmBc[StrEnd[i]] = sz - i - 1;
-}
-
-// Алгоритм Бойера — Мура — Хорспула, упрощенный алгоритм Бойера — Мура
-// возвращает итератор на элемент, являющемся посл. байтом пакета с StrEnd (предшевствующий= it)
-vector<char>::const_iterator StreamReader::find_horspool(const vector<char> &vec, vector<char>::iterator &it){
-    const size_t sz = sizeof(StrEnd);
-    char c;
-
-    while (it <= vec.end()-sz) {
-        c = *(it+sz-1);// берем посл символ из сравниваемой последовательности
-        if (StrEnd[sz-1] == c && memcmp(&*it, StrEnd, sz - 1) == 0){
-            it += sz;
-            return it-1;
-        }
-        it += bmBc[c];
-    }
-    // дошли до конца и ничего не нашли
-    return vec.end();//дошли до конца и ничего не нашли
-}
-
 // Реализация не экономная к памяти
 int StreamReader::receive_fast(const char *stream, size_t bytes_read){
     int npack = 0;
@@ -50,27 +24,51 @@ int StreamReader::receive_fast(const char *stream, size_t bytes_read){
                     it+Offset+*(packlen=reinterpret_cast<uint32_t*>(&it[1])) < buffer.end()){// проверка что пакет пришел целиком
                 handler->handle_binary_data(&it[Offset], static_cast<size_t>(*packlen));// static_cast чтобы избежать C-style cast
                 it += Offset + *packlen;
-            } else { // пакет пришел частично, остальная часть должна придти со следущим вызовом receive
+            } else // пакет пришел частично, остальная часть должна придти со следущим вызовом receive
                 break;// прекращаем цикл
-            }
         } else { // обрабатываем пакет-строку
             if (find_horspool(buffer, it) < buffer.end()) {
                 handler->handle_text_data(&*oldit, distance(oldit, it));
-            } else { // пакет пришел частично
+            } else // пакет пришел частично
                 break;// прекращаем цикл
-            }
         }
         oldit = it;
         npack++;
     }
 
     // подчистка памяти
-    // удаляем неиспользуемое, при этом зарезервированная память остается неизменной
-    if (oldit!=buffer.begin()) {
+    // удаляем уже отправленные неактуальные пакеты, при этом зарезервированная память остается неизменной
+    if (oldit!=buffer.begin())
         buffer.erase(buffer.begin(), oldit);
-    }
 
     return npack;
+}
+
+// Формируем таблицу стоп-символов
+void StreamReader::preBmBc() {
+    const size_t sz = sizeof(StrEnd);
+    memset(bmBc, sz, sizeof(bmBc));
+    for (size_t i = 0; i < sz - 1; ++i)
+        bmBc[StrEnd[i]] = sz - i - 1;
+}
+
+// Алгоритм Бойера — Мура — Хорспула, упрощенный алгоритм Бойера — Мура
+// возвращает итератор на элемент, являющемся первым байтом признака конца пакета(StrEnd)
+vector<char>::const_iterator StreamReader::find_horspool(const vector<char> &vec, vector<char>::iterator &it){
+    const size_t sz = sizeof(StrEnd);
+    char c;
+
+    while (it <= vec.end()-sz) {
+        c = *(it+sz-1);// берем посл. символ из сравниваемой последовательности
+        if (StrEnd[sz-1] == c && memcmp(&*it, StrEnd, sz - 1) == 0) {
+            vector<char>::const_iterator oldit = it;
+            it += sz;
+            return oldit;
+        }
+        it += bmBc[c];
+    }
+
+    return vec.end();//дошли до конца и ничего не нашли
 }
 
 // Реализация экономная к памяти

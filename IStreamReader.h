@@ -8,7 +8,7 @@
 
 class IStreamReader {
 public:
-    virtual ~IStreamReader();
+    virtual ~IStreamReader(){}
     virtual int receive(const char* stream, size_t bytes_read) = 0;
 };
 

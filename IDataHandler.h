@@ -8,7 +8,7 @@
 
 class IDataHandler {
 public:
-	virtual ~IDataHandler();
+	virtual ~IDataHandler(){}
 	virtual void handle_binary_data(const char* data, size_t size) = 0;
 	virtual void handle_text_data(const char* data, size_t size) = 0;
 };

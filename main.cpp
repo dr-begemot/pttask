@@ -12,9 +12,13 @@ using namespace std;
 
 class MyDataHandler: public IDataHandler {
 public:
+    MyDataHandler(){}
+    ~MyDataHandler(){}
+
     void handle_binary_data(const char* data, size_t size){
         cout<<">>bin data ("<<size<<" bytes)"<<endl;
     }
+
     void handle_text_data(const char* data, size_t size){
         cout<<">>str data ("<<size<<" bytes): "<<endl;
         for(size_t i=0; i<size; i++){
@@ -36,7 +40,7 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     cout << "Hello, World!\n";
     shared_ptr<IDataHandler> handler(new MyDataHandler());
-    shared_ptr<StreamReader> receiver(new StreamReader(handler));
+    StreamReader receiver(handler);
 
     /*vector<char> vec;
     const char t1[] = "test1\r\n\r\n"{5,0,0,0, 't','2','A','B','C'};
