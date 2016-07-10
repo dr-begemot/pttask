@@ -11,8 +11,6 @@
 #include "IStreamReader.h"
 #include "IDataHandler.h"
 
-#define USUAL_SIZE 4096
-
 class StreamReader: public IStreamReader {
 public:
     StreamReader(std::shared_ptr<IDataHandler> &ph): handler(ph){
