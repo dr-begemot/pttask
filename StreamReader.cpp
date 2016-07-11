@@ -41,8 +41,8 @@ int StreamReader::receive(const char *stream, size_t bytes_read){
             } else // пакет пришел частично, остальная часть должна придти со следущим вызовом receive
                 break;// прекращаем цикл
         } else { // обрабатываем пакет-строку
-            vector<char>::const_iterator curend;
-            if ((curend=find_horspool(buffer, it)) < buffer.end()) {
+            vector<char>::const_iterator curend = find_horspool(buffer, it);
+            if (curend < buffer.end()) {
                 handler->handle_text_data(&*oldit, static_cast<size_t>(distance<vector<char>::const_iterator>(oldit, curend)));
             } else // пакет пришел частично
                 break;// прекращаем цикл
