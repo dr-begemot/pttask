@@ -20,7 +20,7 @@ public:
     void handle_binary_data(const char* data, size_t size){
         cout<<">>bin data ("<<size<<" bytes):";
         auto flags = cout.flags();
-        for(int i=0; i<size; i++){
+        for(size_t i=0; i<size; i++){
             if(!i%16)
                 cout<<"\n\t";
             cout<<hex<<setfill('0')<<setw(2)<<int((unsigned char)data[i])<<" ";// не нравится, но работает :/
