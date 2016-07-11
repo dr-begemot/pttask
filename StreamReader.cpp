@@ -65,7 +65,7 @@ void StreamReader::preBmBc() {
     const size_t sz = sizeof(StrEnd);
     memset(bmBc, sz, sizeof(bmBc));
     for (size_t i = 0; i < sz - 1; ++i)
-        bmBc[StrEnd[i]] = static_cast<char>(sz - i - 1);
+        bmBc[static_cast<int>(StrEnd[i])] = static_cast<char>(sz - i - 1);
 }
 
 // Алгоритм Бойера — Мура — Хорспула, упрощенный алгоритм Бойера — Мура
@@ -81,7 +81,7 @@ vector<char>::const_iterator StreamReader::find_horspool(const vector<char> &vec
             it += sz;
             return oldit;
         }
-        it += bmBc[c];
+        it += bmBc[static_cast<int>(c)];
     }
 
     return vec.end();//дошли до конца и ничего не нашли
