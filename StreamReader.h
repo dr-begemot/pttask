@@ -7,6 +7,7 @@
 #define StreamReader_h
 
 #include <vector>
+#include <memory>
 
 #include "IStreamReader.h"
 #include "IDataHandler.h"

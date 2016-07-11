@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "StreamReader.h"
 
