@@ -15,6 +15,9 @@ using namespace std;
 int StreamReader::receive(const char *stream, size_t bytes_read){
     vector<char>::iterator it;
 
+    if (buffer.size()+bytes_read == 0)// логика работы с итераторами наже сломается, если будет reseive без данных
+        return 0;
+        
     buffer.reserve(buffer.size()+bytes_read);// проверим память и если надо выделим новую (для корректности итераторов)
     if (buffer.size() >= sizeof(StrEnd)-1 &&  buffer[0] != StartSymbol) {// если буфер не пуст и там часть строкового пакета,
         // то не имеет смысла искать стоп-строку в первой части пакета
